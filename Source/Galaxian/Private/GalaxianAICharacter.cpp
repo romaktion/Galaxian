@@ -59,7 +59,7 @@ void AGalaxianAICharacter::OnKilled()
 {
 	Super::OnKilled();
 
-	SetLifeSpan(1.f);
+	SetLifeSpan(0.5f);
 }
 
 void AGalaxianAICharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

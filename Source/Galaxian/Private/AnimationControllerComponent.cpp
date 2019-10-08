@@ -2,8 +2,6 @@
 
 
 #include "AnimationControllerComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "GalaxianCharacter.h"
 
 // Sets default values for this component's properties
 UAnimationControllerComponent::UAnimationControllerComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -32,40 +30,4 @@ void UAnimationControllerComponent::TickComponent(float DeltaTime, ELevelTick Ti
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-}
-
-FORCEINLINE FVector UAnimationControllerComponent::GetVelocity() const
-{
-	if (!GetOwner())
-		return FVector::ZeroVector;
-
-	if (!MovementComponent)
-	{
-		auto MoveComp = GetOwner()->FindComponentByClass<UCharacterMovementComponent>();
-		if (MoveComp)
-		{
-			MovementComponent = MoveComp;
-			return MovementComponent->Velocity;
-		}
-		else
-		{
-			return FVector::ZeroVector;
-		}
-	}
-	else
-	{
-		return MovementComponent->Velocity;
-	}
-}
-
-FORCEINLINE AGalaxianCharacter* UAnimationControllerComponent::GetCharacter() const
-{
-	return Cast<AGalaxianCharacter>(GetOwner());
-}
-
-FORCEINLINE USkeletalMeshComponent* UAnimationControllerComponent::GetMesh() const
-{
-	auto Char = Cast<AGalaxianCharacter>(GetOwner());
-
-	return Char ? Char->GetMesh() : nullptr;
 }

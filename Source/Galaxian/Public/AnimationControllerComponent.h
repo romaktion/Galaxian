@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "COmponents/SkeletalMeshComponent.h"
+#include "GalaxianCharacter.h"
 #include "AnimationControllerComponent.generated.h"
-
-class UCharacterMovementComponent;
-class AGalaxianCharacter;
-class USkeletalMeshComponent;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable )
@@ -25,13 +24,43 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintPure, Category = "Animation")
-	FORCEINLINE FVector GetVelocity() const;
+	FORCEINLINE FVector GetVelocity() const
+	{
+		if (!GetOwner())
+			return FVector::ZeroVector;
+
+		if (!MovementComponent)
+		{
+			auto MoveComp = GetOwner()->FindComponentByClass<UCharacterMovementComponent>();
+			if (MoveComp)
+			{
+				MovementComponent = MoveComp;
+				return MovementComponent->Velocity;
+			}
+			else
+			{
+				return FVector::ZeroVector;
+			}
+		}
+		else
+		{
+			return MovementComponent->Velocity;
+		}
+	}
 
 	UFUNCTION(BlueprintPure, Category = "Animation")
-	FORCEINLINE AGalaxianCharacter* GetCharacter() const;
+	FORCEINLINE AGalaxianCharacter* GetCharacter() const
+	{
+		return Cast<AGalaxianCharacter>(GetOwner());
+	}
 
 	UFUNCTION(BlueprintPure, Category = "Animation")
-	FORCEINLINE USkeletalMeshComponent* GetMesh() const;
+	FORCEINLINE USkeletalMeshComponent* GetMesh() const
+	{
+		auto Char = Cast<AGalaxianCharacter>(GetOwner());
+
+		return Char ? Char->GetMesh() : nullptr;
+	}
 
 private:
 	mutable UCharacterMovementComponent* MovementComponent;
