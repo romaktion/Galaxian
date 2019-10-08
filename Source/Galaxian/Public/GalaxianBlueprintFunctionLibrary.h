@@ -6,6 +6,9 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "GalaxianBlueprintFunctionLibrary.generated.h"
 
+#define COLLISION_PROJECTILE ECC_GameTraceChannel1
+#define COLLISION_BARRIERS ECC_GameTraceChannel2
+
 UENUM(BlueprintType)
 enum class EDiplomacyEnum : uint8
 {

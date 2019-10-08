@@ -48,9 +48,11 @@ void AGalaxianAICharacter::StartRaidAttack()
 	SpawnDefaultController();
 	GetCapsuleComponent()->SetCollisionProfileName("Projectile");
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block);
-	GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_WorldDynamic);
 	SetActorTickEnabled(true);
+
+	OnStartRaidAttack.Broadcast();
 }
 
 void AGalaxianAICharacter::OnKilled()

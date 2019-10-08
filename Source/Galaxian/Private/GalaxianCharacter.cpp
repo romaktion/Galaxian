@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GalaxianPlayerController.h"
 #include "GalaxianGameInstance.h"
+#include "GalaxianBlueprintFunctionLibrary.h"
 
 // Sets default values
 AGalaxianCharacter::AGalaxianCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -153,7 +154,16 @@ void AGalaxianCharacter::MeshTickTimer()
 
 void AGalaxianCharacter::MulticastDestroy_Implementation()
 {
-	SetActorEnableCollision(false);
+	if (Role == ROLE_Authority)
+	{
+		SetActorEnableCollision(false);
+	}
+	else
+	{
+		GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+		GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
+	}
+	
 	SetActorHiddenInGame(true);
 
 	if (DestroyEffect)

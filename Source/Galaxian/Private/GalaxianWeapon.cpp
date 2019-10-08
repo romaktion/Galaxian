@@ -6,6 +6,7 @@
 #include "GalaxianProjectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
+#include "UnrealNetwork.h"
 
 // Sets default values
 AGalaxianWeapon::AGalaxianWeapon(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -14,6 +15,7 @@ AGalaxianWeapon::AGalaxianWeapon(const FObjectInitializer& ObjectInitializer) : 
 , AutomaticWeapon(false)
 , MuzzleEffect(nullptr)
 , Diplomacy(0)
+, ManualShot(false)
 , LastTimeFire(0.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -75,7 +77,10 @@ void AGalaxianWeapon::Fire()
 	if (!World)
 		return;
 
-	SpawnProjectile();
+	OnFire.Broadcast();
+
+	if (!ManualShot)
+		SpawnProjectile();
 
 	LastTimeFire = World->GetTimeSeconds();
 }
@@ -156,7 +161,6 @@ void AGalaxianWeapon::StartFireTimer()
 	if (AutomaticWeapon)
 	{
 		float FirstDelay = LastTimeFire > 0 ? FMath::Max(DelayBetweenShots - (World->GetTimeSeconds() - LastTimeFire), 0.0f) : LastTimeFire;
-		UE_LOG(LogTemp, Log, TEXT("FirstDelay: %i"), (int)FirstDelay);
 		GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &AGalaxianWeapon::Fire, DelayBetweenShots, true, FirstDelay);
 	}
 	else
@@ -184,4 +188,11 @@ void AGalaxianWeapon::OnProjectileHit(AGalaxianProjectile* Projectile)
 	Projectile->SetActorEnableCollision(false);
 	Projectile->SetActorHiddenInGame(true);
 	ProjectilePool.Push(Projectile);
+}
+
+void AGalaxianWeapon::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGalaxianWeapon, Diplomacy);
 }

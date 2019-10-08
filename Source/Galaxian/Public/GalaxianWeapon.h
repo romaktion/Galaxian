@@ -9,6 +9,8 @@
 class AGalaxianProjectile;
 class UParticleSystem;
 
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE(FOnFireSignature, AGalaxianWeapon, OnFire);
+
 UCLASS(Abstract)
 class GALAXIAN_API AGalaxianWeapon : public AActor
 {
@@ -26,6 +28,9 @@ public:
 
 	void StopFire();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void SpawnProjectile();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float FireRate;
 
@@ -38,8 +43,14 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UParticleSystem* MuzzleEffect;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	int32 Diplomacy;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFireSignature OnFire;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool ManualShot;
 
 private:
 	UFUNCTION()
@@ -56,8 +67,6 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStopFire();
-
-	void SpawnProjectile();
 
 	void StartFireTimer();
 

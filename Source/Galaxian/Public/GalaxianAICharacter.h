@@ -6,6 +6,8 @@
 #include "GalaxianCharacter.h"
 #include "GalaxianAICharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE(FOnOnStartRaidAttackSignature, AGalaxianAICharacter, OnStartRaidAttack);
+
 /**
  * 
  */
@@ -28,6 +30,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* RaidAttackImpactEffect;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOnStartRaidAttackSignature OnStartRaidAttack;
 
 private:
 	UFUNCTION()
