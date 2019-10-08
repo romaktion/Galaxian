@@ -17,4 +17,16 @@ class GALAXIAN_API AGalaxianGameMode : public AGameModeBase
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	
 	virtual FString	InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal = TEXT("")) override;
+
+private:
+	UFUNCTION()
+	void OnKilled(AActor* PlayerCharacter);
+
+	UFUNCTION()
+	void OnKilledTimer();
+
+	FTimerHandle OnKilledTimerHandle;
+
+	int32 CountPlayers;
+
 };

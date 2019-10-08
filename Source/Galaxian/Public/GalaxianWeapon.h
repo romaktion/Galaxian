@@ -7,8 +7,9 @@
 #include "GalaxianWeapon.generated.h"
 
 class AGalaxianProjectile;
+class UParticleSystem;
 
-UCLASS()
+UCLASS(Abstract)
 class GALAXIAN_API AGalaxianWeapon : public AActor
 {
 	GENERATED_UCLASS_BODY()
@@ -31,6 +32,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AGalaxianProjectile> ProjectileClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool AutomaticWeapon;
+
+	UPROPERTY(EditDefaultsOnly)
+	UParticleSystem* MuzzleEffect;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 Diplomacy;
+
 private:
 	UFUNCTION()
 	void Fire();
@@ -41,10 +51,10 @@ private:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerStopFire();
 
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartFire();
 
-	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStopFire();
 
 	void SpawnProjectile();

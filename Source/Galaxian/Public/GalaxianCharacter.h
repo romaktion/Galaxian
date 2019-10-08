@@ -9,7 +9,7 @@
 class AGalaxianWeapon;
 class UGalaxianHealthComponent;
 
-UCLASS()
+UCLASS(Abstract)
 class GALAXIAN_API AGalaxianCharacter : public ACharacter
 {
 	GENERATED_UCLASS_BODY()
@@ -48,6 +48,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Character")
 	void SetDiplomacy(const int32& NewDiplomacy);
 
+	UFUNCTION()
+	virtual void OnKilled();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Character", DisplayName = "OnKilled")
+	void K2_OnKilled();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UGalaxianHealthComponent* HealthComponent;
 
@@ -57,6 +63,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Character")
 	FName WeaponSocketName;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	UParticleSystem* DestroyEffect;
+
 private:
 	void Move(float Value);
 
@@ -64,9 +73,18 @@ private:
 
 	void StopFire();
 
+	UFUNCTION()
+	void MeshTickTimer();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastDestroy();
+
+	FTimerHandle MeshTickTimerHandler;
+
 	UPROPERTY(Replicated)
 	AGalaxianWeapon* Weapon;
 
-	UPROPERTY(Replicated)
+protected:
+	UPROPERTY(Replicated, EditAnywhere)
 	int32 Diplomacy;
 };

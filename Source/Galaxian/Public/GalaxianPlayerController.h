@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GalaxianPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnCharacterKilledSignature, AGalaxianPlayerController, OnCharacterKilled, AActor*, PlayerCharacter);
+
 /**
  * 
  */
@@ -16,4 +18,7 @@ class GALAXIAN_API AGalaxianPlayerController : public APlayerController
 	
 	UFUNCTION(BlueprintCallable, Category = "UserInterface")
 	void PerformClientTravel(const FString& Path);
+
+	UPROPERTY(BlueprintAssignable, Category = "Character")
+	FOnCharacterKilledSignature OnCharacterKilled;
 };

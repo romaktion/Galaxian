@@ -8,6 +8,13 @@
 
 class AGalaxianCharacter;
 
+UENUM(BlueprintType)
+enum class EPlayerStateEnum : uint8
+{
+	PS_Alive 	UMETA(DisplayName = "Alive"),
+	PS_Killed 	UMETA(DisplayName = "Killed")
+};
+
 /**
  * 
  */
@@ -19,5 +26,18 @@ class GALAXIAN_API AGalaxianPlayerState : public APlayerState
 	UPROPERTY(Replicated)
 	TSubclassOf<AGalaxianCharacter> PlayerPawnClass;
 
-	virtual void CopyProperties(APlayerState* PlayerState) override;
+	virtual void CopyProperties(APlayerState* InPlayerState) override;
+
+	UFUNCTION(BlueprintPure, Category = "PlayerState")
+	EPlayerStateEnum GetPlayerState() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerState")
+	void SetPlayerState(EPlayerStateEnum NewPlayerState);
+
+	UFUNCTION(Client, Reliable)
+	void GoToMainMenu();
+
+private:
+	UPROPERTY(Replicated)
+	EPlayerStateEnum PlayerState;
 };

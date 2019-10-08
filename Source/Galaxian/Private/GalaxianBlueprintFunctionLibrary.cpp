@@ -2,6 +2,8 @@
 
 
 #include "GalaxianBlueprintFunctionLibrary.h"
+#include "GalaxianCharacter.h"
+
 
 UGalaxianBlueprintFunctionLibrary::UGalaxianBlueprintFunctionLibrary(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -25,4 +27,31 @@ FString UGalaxianBlueprintFunctionLibrary::GetStringFromConfig(const FString& Se
 	FString NewValue = "";
 	IfFind = GConfig->GetString(*Section, *ValueName, NewValue, GGameIni);
 	return NewValue;
+}
+
+EDiplomacyEnum UGalaxianBlueprintFunctionLibrary::GetDiplomacy(AActor* A, AActor* B)
+{
+	auto AChar = Cast<AGalaxianCharacter>(A);
+	auto BChar = Cast<AGalaxianCharacter>(B);
+	if (AChar && BChar)
+	{
+		return AChar->GetDiplomacy() == BChar->GetDiplomacy() ? EDiplomacyEnum::DP_Friendly : EDiplomacyEnum::DP_Hostile;
+	}
+	else
+	{
+		return EDiplomacyEnum::DP_Hostile;
+	}
+}
+
+EDiplomacyEnum UGalaxianBlueprintFunctionLibrary::GetDiplomacyByValue(AActor* A, const int32& B)
+{
+	auto AChar = Cast<AGalaxianCharacter>(A);
+	if (AChar)
+	{
+		return AChar->GetDiplomacy() == B ? EDiplomacyEnum::DP_Friendly : EDiplomacyEnum::DP_Hostile;
+	}
+	else
+	{
+		return EDiplomacyEnum::DP_Hostile;
+	}
 }

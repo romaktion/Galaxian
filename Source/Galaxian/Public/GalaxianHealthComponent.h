@@ -43,20 +43,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Character")
 	FOnKilledSignature OnKilled;
 
-	UPROPERTY(EditDefaultsOnly)
-	float MaxHealth;
-
-	UPROPERTY(EditDefaultsOnly)
-	float Health;
-
 private:
 
 	UFUNCTION()
 	void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser );
 
-	UPROPERTY(Replicated)
-	float MaxHealthPrivate;
+private:
+	UPROPERTY(Replicated, EditAnywhere)
+	float MaxHealth;
 
-	UPROPERTY(Replicated)
-	float HealthPrivate;
+	UPROPERTY(Replicated, EditAnywhere)
+	float Health;
 };

@@ -8,11 +8,14 @@
 #include "GalaxianHealthComponent.h"
 #include "UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "GalaxianPlayerController.h"
+#include "GalaxianGameInstance.h"
 
 // Sets default values
 AGalaxianCharacter::AGalaxianCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 , WeaponClass(nullptr)
 , WeaponSocketName(TEXT("WeaponSocket"))
+, DestroyEffect(nullptr)
 , Weapon(nullptr)
 , Diplomacy(0)
 {
@@ -21,6 +24,7 @@ AGalaxianCharacter::AGalaxianCharacter(const FObjectInitializer& ObjectInitializ
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 	GetMesh()->KinematicBonesUpdateType = EKinematicBonesUpdateToPhysics::SkipAllBones;
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	HealthComponent = CreateDefaultSubobject<UGalaxianHealthComponent>(TEXT("HealthComponent"));
@@ -39,6 +43,7 @@ void AGalaxianCharacter::BeginPlay()
 			auto Weap = World->SpawnActorDeferred<AGalaxianWeapon>(WeaponClass, FTransform::Identity, this, this, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 			if (Weap)
 			{
+				Weap->Diplomacy = GetDiplomacy();
 				UGameplayStatics::FinishSpawningActor(Weap, FTransform::Identity);
 
 				if (GetMesh())
@@ -47,6 +52,18 @@ void AGalaxianCharacter::BeginPlay()
 				SetWeapon(Weap);
 			}
 		}
+	}
+
+	if (HealthComponent)
+		HealthComponent->OnKilled.AddUniqueDynamic(this, &AGalaxianCharacter::OnKilled);
+
+	GetMesh()->SetComponentTickEnabled(false);
+	GetWorldTimerManager().SetTimer(MeshTickTimerHandler, this, &AGalaxianCharacter::MeshTickTimer, FMath::RandRange(0.f, 1.f), false, FMath::RandRange(0.f, 1.f));
+
+	auto GI = Cast<UGalaxianGameInstance>(GetGameInstance());
+	if (GI)
+	{
+		GI->IgnoredActors.Add(this);
 	}
 }
 
@@ -127,6 +144,39 @@ void AGalaxianCharacter::StopFire()
 {
 	if (Weapon)
 		Weapon->StopFire();
+}
+
+void AGalaxianCharacter::MeshTickTimer()
+{
+	GetMesh()->SetComponentTickEnabled(true);
+}
+
+void AGalaxianCharacter::MulticastDestroy_Implementation()
+{
+	SetActorEnableCollision(false);
+	SetActorHiddenInGame(true);
+
+	if (DestroyEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyEffect, GetActorTransform(), true, EPSCPoolMethod::AutoRelease);
+	}
+}
+
+void AGalaxianCharacter::OnKilled()
+{
+	auto PS = Cast<AGalaxianPlayerState>(GetPlayerState());
+
+	if (PS)
+	{
+		PS->SetPlayerState(EPlayerStateEnum::PS_Killed);
+	}
+
+	auto PC = Cast<AGalaxianPlayerController>(GetController());
+	if (PC)
+		PC->OnCharacterKilled.Broadcast(this);
+
+	MulticastDestroy();
+	K2_OnKilled();
 }
 
 void AGalaxianCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

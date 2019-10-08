@@ -8,13 +8,10 @@
 UGalaxianHealthComponent::UGalaxianHealthComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 , MaxHealth(0.f)
 , Health(0.f)
-, MaxHealthPrivate(MaxHealth)
-, HealthPrivate(Health)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-
 	// ...
 }
 
@@ -42,29 +39,29 @@ void UGalaxianHealthComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 
 float UGalaxianHealthComponent::GetMaxHealth() const
 {
-	return MaxHealthPrivate;
+	return MaxHealth;
 }
 
 float UGalaxianHealthComponent::GetHealth() const
 {
-	return HealthPrivate;
+	return Health;
 }
 
 bool UGalaxianHealthComponent::IsKilled() const
 {
-	return HealthPrivate <= 0;
+	return Health <= 0;
 }
 
 void UGalaxianHealthComponent::SetMaxHealth(const float& NewMaxHealth)
 {
 	if (GetOwner() && GetOwner()->Role == ROLE_Authority)
-		MaxHealthPrivate = NewMaxHealth;
+		MaxHealth = NewMaxHealth;
 }
 
 void UGalaxianHealthComponent::SetHealth(const float& NewHealth)
 {
 	if (GetOwner() && GetOwner()->Role == ROLE_Authority)
-		HealthPrivate = NewHealth;
+		Health = NewHealth;
 }
 
 void UGalaxianHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -72,7 +69,7 @@ void UGalaxianHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damag
 	if (IsKilled())
 		return;
 
-	SetHealth(FMath::Clamp(HealthPrivate - Damage, 0.f, HealthPrivate - Damage));
+	SetHealth(FMath::Clamp(Health - Damage, 0.f, Health - Damage));
 	if (IsKilled())
 		OnKilled.Broadcast();
 }
@@ -81,6 +78,6 @@ void UGalaxianHealthComponent::GetLifetimeReplicatedProps(TArray< FLifetimePrope
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UGalaxianHealthComponent, MaxHealthPrivate);
-	DOREPLIFETIME(UGalaxianHealthComponent, HealthPrivate);
+	DOREPLIFETIME(UGalaxianHealthComponent, MaxHealth);
+	DOREPLIFETIME(UGalaxianHealthComponent, Health);
 }

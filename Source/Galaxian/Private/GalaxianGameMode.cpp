@@ -8,8 +8,10 @@
 #include "GalaxianCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObjectGlobals.h"
+#include "Engine/World.h"
 
 AGalaxianGameMode::AGalaxianGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+, CountPlayers(0)
 {
 	GameStateClass = AGalaxianGameState::StaticClass();
 	PlayerStateClass = AGalaxianPlayerState::StaticClass();
@@ -32,6 +34,16 @@ UClass* AGalaxianGameMode::GetDefaultPawnClassForController_Implementation(ACont
 
 FString AGalaxianGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal /*= TEXT("")*/)
 {
+	if (!NewPlayerController)
+		return "";
+
+	auto PlayerController = Cast<AGalaxianPlayerController>(NewPlayerController);
+	if (PlayerController)
+	{
+		CountPlayers++;
+		PlayerController->OnCharacterKilled.AddUniqueDynamic(this, &AGalaxianGameMode::OnKilled);
+	}	
+
 	FString ClassName = *UGameplayStatics::ParseOption(Options, TEXT("PlayerPawnClass"));
 
 	UClass* PlayerPawnClass = nullptr;
@@ -74,4 +86,33 @@ FString AGalaxianGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 	}
 
 	return Super::InitNewPlayer(NewPlayerController, UniqueId, OptionsCopy, Portal);
+}
+
+void AGalaxianGameMode::OnKilled(AActor* PlayerCharacter)
+{
+	CountPlayers--;
+
+	if (CountPlayers <= 0)
+	{
+		GetWorldTimerManager().SetTimer(OnKilledTimerHandle, this, &AGalaxianGameMode::OnKilledTimer, 3.f);
+	}
+}
+
+void AGalaxianGameMode::OnKilledTimer()
+{
+	auto World = GetWorld();
+	if (World)
+	{
+		for (FConstPlayerControllerIterator Iterator = World->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			if (Iterator->IsValid())
+			{
+				auto PlayerState = Cast<AGalaxianPlayerState>(Iterator->Get()->PlayerState);
+				if (PlayerState)
+				{
+					PlayerState->GoToMainMenu();
+				}
+			}
+		}
+	}
 }

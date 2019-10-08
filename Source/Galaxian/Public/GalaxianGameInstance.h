@@ -16,4 +16,6 @@ class GALAXIAN_API UGalaxianGameInstance : public UGameInstance
 {
 	GENERATED_UCLASS_BODY()
 
+	UPROPERTY()
+	TArray<AActor*> IgnoredActors;
 };

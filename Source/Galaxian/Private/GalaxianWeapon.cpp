@@ -4,11 +4,16 @@
 #include "GalaxianWeapon.h"
 #include "TimerManager.h"
 #include "GalaxianProjectile.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values
 AGalaxianWeapon::AGalaxianWeapon(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 , FireRate(0.f)
 , ProjectileClass(nullptr)
+, AutomaticWeapon(false)
+, MuzzleEffect(nullptr)
+, Diplomacy(0)
 , LastTimeFire(0.f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -33,6 +38,12 @@ void AGalaxianWeapon::Tick(float DeltaTime)
 
 void AGalaxianWeapon::StartFire()
 {
+	if (!this || !GetWorld())
+		return;
+
+	if (GetWorldTimerManager().IsTimerActive(TimerHandle_TimeBetweenShots))
+		return;
+
 	if (Role < ROLE_Authority)
 	{
 		StartFireTimer();
@@ -94,19 +105,9 @@ void AGalaxianWeapon::MulticastStartFire_Implementation()
 	StartFireTimer();
 }
 
-bool AGalaxianWeapon::MulticastStartFire_Validate()
-{
-	return true;
-}
-
 void AGalaxianWeapon::MulticastStopFire_Implementation()
 {
 	StopFireTimer();
-}
-
-bool AGalaxianWeapon::MulticastStopFire_Validate()
-{
-	return true;
 }
 
 void AGalaxianWeapon::SpawnProjectile()
@@ -115,6 +116,8 @@ void AGalaxianWeapon::SpawnProjectile()
 
 	if (!World)
 		return;
+
+	UGameplayStatics::SpawnEmitterAtLocation(World, MuzzleEffect, GetActorTransform(), true, EPSCPoolMethod::AutoRelease);
 
 	FTransform Transform;
 	Transform.SetRotation(FQuat(GetActorRotation()));
@@ -130,33 +133,46 @@ void AGalaxianWeapon::SpawnProjectile()
 		}
 	}
 
-	FActorSpawnParameters ActorSpawnParameters;
-	ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	ActorSpawnParameters.Owner = this;
-	ActorSpawnParameters.Instigator = Cast<APawn>(GetOwner());
-
-	auto Projectile = World->SpawnActor<AGalaxianProjectile>(ProjectileClass, Transform, ActorSpawnParameters);
+	auto Projectile = World->SpawnActorDeferred<AGalaxianProjectile>(ProjectileClass, Transform, this, GetInstigator(), ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (Projectile)
 	{
+		Projectile->Diplomacy = Diplomacy;
+		UGameplayStatics::FinishSpawningActor(Projectile, Transform);
 		Projectile->OnHitDelegate.AddUniqueDynamic(this, &AGalaxianWeapon::OnProjectileHit);
 	}
 }
 
 void AGalaxianWeapon::StartFireTimer()
 {
+	if (!this || !GetWorld())
+		return;
+
 	auto World = GetWorld();
 	if (!World)
 		return;
 
 	float DelayBetweenShots = 60 / FireRate;
 
-	float FirstDelay = LastTimeFire > 0 ? FMath::Max(DelayBetweenShots - (World->GetTimeSeconds() - LastTimeFire), 0.0f) : LastTimeFire;
-	UE_LOG(LogTemp, Log, TEXT("FirstDelay: %i"), (int)FirstDelay);
-	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &AGalaxianWeapon::Fire, DelayBetweenShots, true, FirstDelay);
+	if (AutomaticWeapon)
+	{
+		float FirstDelay = LastTimeFire > 0 ? FMath::Max(DelayBetweenShots - (World->GetTimeSeconds() - LastTimeFire), 0.0f) : LastTimeFire;
+		UE_LOG(LogTemp, Log, TEXT("FirstDelay: %i"), (int)FirstDelay);
+		GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &AGalaxianWeapon::Fire, DelayBetweenShots, true, FirstDelay);
+	}
+	else
+	{
+		if (World->GetTimeSeconds() - LastTimeFire > DelayBetweenShots || LastTimeFire <= 0)
+		{
+			Fire();
+		}
+	}
 }
 
 void AGalaxianWeapon::StopFireTimer()
 {
+	if (!this || !GetWorld())
+		return;
+
 	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
 }
 
