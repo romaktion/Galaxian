@@ -47,16 +47,9 @@ void AGalaxianAICharacter::StartRaidAttack()
 
 	IsRaidAttack= true;
 
+	GetWorldTimerManager().SetTimer(StartRaidAttackTimerHandle, this, &AGalaxianAICharacter::StartRaidAttackTimer, 1.f);
+
 	MulticastOnStartRaidAttack();
-
-	SpawnDefaultController();
-	GetCapsuleComponent()->SetCollisionProfileName("Projectile");
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
-	GetCapsuleComponent()->SetCollisionObjectType(ECC_WorldDynamic);
-	SetActorTickEnabled(true);
-
-	OnStartRaidAttack.Broadcast();
 }
 
 void AGalaxianAICharacter::OnKilled(AActor* KilledActor, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -81,6 +74,18 @@ void AGalaxianAICharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 
 		MulticastRaidEffect();
 	}
+}
+
+void AGalaxianAICharacter::StartRaidAttackTimer()
+{
+	SpawnDefaultController();
+	GetCapsuleComponent()->SetCollisionProfileName("Projectile");
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_PROJECTILE, ECR_Block);
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_WorldDynamic);
+	SetActorTickEnabled(true);
+
+	OnStartRaidAttack.Broadcast();
 }
 
 void AGalaxianAICharacter::MulticastOnStartRaidAttack_Implementation()

@@ -144,7 +144,7 @@ void AGalaxianCharacter::Move(float Value)
 
 void AGalaxianCharacter::StartFire()
 {
-	if (Weapon)
+	if (Weapon && HealthComponent && !HealthComponent->IsKilled())
 		Weapon->StartFire();
 }
 
@@ -209,6 +209,8 @@ void AGalaxianCharacter::OnKilled(AActor* KilledActor, const class UDamageType* 
 	auto PC = Cast<AGalaxianPlayerController>(GetController());
 	if (PC)
 		PC->OnCharacterKilled.Broadcast(this);
+
+	StopFire();
 
 	MulticastDestroy();
 	K2_OnKilled(DamageType, InstigatedBy, DamageCauser);

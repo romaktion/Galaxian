@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "GalaxianGameMode.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnGameOverSignature, AGalaxianGameMode, OnGameOver, bool, Win);
+
 /**
  * 
  */
@@ -22,6 +24,9 @@ class GALAXIAN_API AGalaxianGameMode : public AGameModeBase
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 Win;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGameOverSignature OnGameOver;
 
 private:
 	UFUNCTION()

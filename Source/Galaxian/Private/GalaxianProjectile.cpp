@@ -114,7 +114,7 @@ void AGalaxianProjectile::HitImpl(AActor* OtherActor, const FHitResult& Hit, boo
 		if (DamageRadius <= 0)
 			UGameplayStatics::ApplyPointDamage(OtherActor, Damage, FVector::ZeroVector, Hit, GetInstigatorController(), this, UGalaxianDamageType::StaticClass());
 		else
-			UGameplayStatics::ApplyRadialDamage(this, Damage * 2.5f, GetActorLocation(), DamageRadius, UGalaxianDamageType::StaticClass(), TArray<AActor*>(), this, GetInstigatorController(), false, ECC_WorldStatic);
+			UGameplayStatics::ApplyRadialDamage(this, Damage * 3.f, GetActorLocation(), DamageRadius, UGalaxianDamageType::StaticClass(), TArray<AActor*>(), this, GetInstigatorController(), false, ECC_WorldStatic);
 
 		SetActorEnableCollision(false);
 		SetActorHiddenInGame(true);

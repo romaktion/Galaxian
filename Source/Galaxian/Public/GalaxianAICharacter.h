@@ -47,6 +47,11 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastOnStartRaidAttack();
 
+	UFUNCTION()
+	void StartRaidAttackTimer();
+
 	bool IsRaidAttack;
+
+	FTimerHandle StartRaidAttackTimerHandle;
 
 };

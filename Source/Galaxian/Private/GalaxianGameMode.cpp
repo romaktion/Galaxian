@@ -92,7 +92,8 @@ FString AGalaxianGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 void AGalaxianGameMode::PerformGameOver(int32 InWin)
 {
 	Win = InWin;
-	GetWorldTimerManager().SetTimer(OnKilledTimerHandle, this, &AGalaxianGameMode::GoToMainMenuTimer, 3.f);
+	OnGameOver.Broadcast(Win);
+	GetWorldTimerManager().SetTimer(OnKilledTimerHandle, this, &AGalaxianGameMode::GoToMainMenuTimer, 5.f);
 }
 
 void AGalaxianGameMode::OnKilled(AActor* PlayerCharacter)
