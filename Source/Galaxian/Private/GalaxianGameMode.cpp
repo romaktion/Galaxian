@@ -11,6 +11,7 @@
 #include "Engine/World.h"
 
 AGalaxianGameMode::AGalaxianGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+, Win(-1)
 , CountPlayers(0)
 {
 	GameStateClass = AGalaxianGameState::StaticClass();
@@ -88,17 +89,23 @@ FString AGalaxianGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 	return Super::InitNewPlayer(NewPlayerController, UniqueId, OptionsCopy, Portal);
 }
 
+void AGalaxianGameMode::PerformGameOver(int32 InWin)
+{
+	Win = InWin;
+	GetWorldTimerManager().SetTimer(OnKilledTimerHandle, this, &AGalaxianGameMode::GoToMainMenuTimer, 3.f);
+}
+
 void AGalaxianGameMode::OnKilled(AActor* PlayerCharacter)
 {
 	CountPlayers--;
 
 	if (CountPlayers <= 0)
 	{
-		GetWorldTimerManager().SetTimer(OnKilledTimerHandle, this, &AGalaxianGameMode::OnKilledTimer, 3.f);
+		PerformGameOver(0);
 	}
 }
 
-void AGalaxianGameMode::OnKilledTimer()
+void AGalaxianGameMode::GoToMainMenuTimer()
 {
 	auto World = GetWorld();
 	if (World)
@@ -110,7 +117,7 @@ void AGalaxianGameMode::OnKilledTimer()
 				auto PlayerState = Cast<AGalaxianPlayerState>(Iterator->Get()->PlayerState);
 				if (PlayerState)
 				{
-					PlayerState->GoToMainMenu();
+					PlayerState->GoToMainMenu(Win);
 				}
 			}
 		}

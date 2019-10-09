@@ -172,7 +172,7 @@ void AGalaxianCharacter::MulticastDestroy_Implementation()
 	}
 }
 
-void AGalaxianCharacter::OnKilled()
+void AGalaxianCharacter::OnKilled(AActor* KilledActor, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
 	auto PS = Cast<AGalaxianPlayerState>(GetPlayerState());
 
@@ -186,7 +186,7 @@ void AGalaxianCharacter::OnKilled()
 		PC->OnCharacterKilled.Broadcast(this);
 
 	MulticastDestroy();
-	K2_OnKilled();
+	K2_OnKilled(DamageType, InstigatedBy, DamageCauser);
 }
 
 void AGalaxianCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

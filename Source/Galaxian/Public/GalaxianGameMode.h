@@ -18,15 +18,19 @@ class GALAXIAN_API AGalaxianGameMode : public AGameModeBase
 	
 	virtual FString	InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal = TEXT("")) override;
 
+	void PerformGameOver(int32 InWin);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 Win;
+
 private:
 	UFUNCTION()
 	void OnKilled(AActor* PlayerCharacter);
 
 	UFUNCTION()
-	void OnKilledTimer();
+	void GoToMainMenuTimer();
 
 	FTimerHandle OnKilledTimerHandle;
 
 	int32 CountPlayers;
-
 };

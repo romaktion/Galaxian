@@ -5,12 +5,13 @@
 #include "GalaxianCharacter.h"
 #include "UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "GalaxianGameInstance.h"
 
 AGalaxianPlayerState::AGalaxianPlayerState(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 , PlayerPawnClass(nullptr)
 , PlayerState(EPlayerStateEnum::PS_Alive)
 {
-	bUseCustomPlayerNames = true;
+	Score = 0.f;
 }
 
 void AGalaxianPlayerState::CopyProperties(APlayerState* InPlayerState)
@@ -34,9 +35,45 @@ void AGalaxianPlayerState::SetPlayerState(EPlayerStateEnum NewPlayerState)
 		PlayerState = NewPlayerState;
 }
 
-void AGalaxianPlayerState::GoToMainMenu_Implementation()
+void AGalaxianPlayerState::AddEnemyCounter()
 {
-	UGameplayStatics::OpenLevel(this, "MainMenu");
+	if (Role == ROLE_Authority)
+	{
+		Score += 1;
+		OnEnemyKilled.Broadcast();
+	}
+ }
+
+int32 AGalaxianPlayerState::GetEnemyCounter() const
+{
+	return Score;
+}
+
+void AGalaxianPlayerState::OnRep_Score()
+{
+	OnEnemyKilled.Broadcast();
+}
+
+void AGalaxianPlayerState::GoToMainMenu_Implementation(bool Win)
+{
+	auto GI = Cast<UGalaxianGameInstance>(GetGameInstance());
+	if (GI)
+	{
+		auto PN = GetPlayerName();
+		auto Finded = GI->LeaderBoard.Find(GetPlayerName());
+		if (Finded)
+		{
+			GI->CountDuplicates++;
+			PN.AppendInt(GI->CountDuplicates);
+		}
+
+		GI->LeaderBoard.Add(PN, Score);
+		GI->LeaderBoard.ValueSort([](int32 A, int32 B){ return A > B; });
+		GI->Win = Win;
+	}
+
+	if (GetPawn() && GetPawn()->IsLocallyControlled())
+		UGameplayStatics::OpenLevel(this, "MainMenu");
 }
 
 void AGalaxianPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

@@ -50,10 +50,10 @@ public:
 	void SetDiplomacy(const int32& NewDiplomacy);
 
 	UFUNCTION()
-	virtual void OnKilled();
+	virtual void OnKilled(AActor* KilledActor, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Character", DisplayName = "OnKilled")
-	void K2_OnKilled();
+	void K2_OnKilled(const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UGalaxianHealthComponent* HealthComponent;

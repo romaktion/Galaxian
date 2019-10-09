@@ -6,7 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "GalaxianHealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE(FOnKilledSignature, UGalaxianHealthComponent, OnKilled);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_FourParams(FOnKilledSignature, UGalaxianHealthComponent, OnKilled, AActor*, KilledActor, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnChangeMaxHealth, UGalaxianHealthComponent, OnChangeMaxHealth, float, Delta);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnChangeHealth, UGalaxianHealthComponent, OnChangeHealth, float, Delta);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GALAXIAN_API UGalaxianHealthComponent : public UActorComponent
@@ -43,15 +45,27 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Character")
 	FOnKilledSignature OnKilled;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnChangeMaxHealth OnChangeMaxHealth;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnChangeHealth OnChangeHealth;
+
 private:
 
 	UFUNCTION()
 	void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser );
 
 private:
-	UPROPERTY(Replicated, EditAnywhere)
+	UFUNCTION()
+	void OnRep_MaxHealth(float OldMaxHealth);
+
+	UFUNCTION()
+	void OnRep_Health(float OldHealth);
+
+	UPROPERTY(ReplicatedUsing=OnRep_MaxHealth, EditAnywhere)
 	float MaxHealth;
 
-	UPROPERTY(Replicated, EditAnywhere)
+	UPROPERTY(ReplicatedUsing=OnRep_Health, EditAnywhere)
 	float Health;
 };

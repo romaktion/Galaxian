@@ -4,6 +4,8 @@
 #include "GalaxianGameInstance.h"
 
 UGalaxianGameInstance::UGalaxianGameInstance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+, Win(false)
+, CountDuplicates(0)
 {
 	
 }

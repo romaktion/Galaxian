@@ -13,6 +13,8 @@ UGalaxianHealthComponent::UGalaxianHealthComponent(const FObjectInitializer& Obj
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	// ...
+
+	SetIsReplicated(true);
 }
 
 
@@ -55,13 +57,21 @@ bool UGalaxianHealthComponent::IsKilled() const
 void UGalaxianHealthComponent::SetMaxHealth(const float& NewMaxHealth)
 {
 	if (GetOwner() && GetOwner()->Role == ROLE_Authority)
+	{
+		auto OldMaxHealth = MaxHealth;
 		MaxHealth = NewMaxHealth;
+		OnRep_MaxHealth(OldMaxHealth);
+	}
 }
 
 void UGalaxianHealthComponent::SetHealth(const float& NewHealth)
 {
 	if (GetOwner() && GetOwner()->Role == ROLE_Authority)
+	{
+		auto OldHealth = Health;
 		Health = NewHealth;
+		OnRep_Health(OldHealth);
+	}
 }
 
 void UGalaxianHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
@@ -71,7 +81,17 @@ void UGalaxianHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damag
 
 	SetHealth(FMath::Clamp(Health - Damage, 0.f, Health - Damage));
 	if (IsKilled())
-		OnKilled.Broadcast();
+		OnKilled.Broadcast(DamagedActor, DamageType, InstigatedBy, DamageCauser);
+}
+
+void UGalaxianHealthComponent::OnRep_MaxHealth(float OldMaxHealth)
+{
+	OnChangeMaxHealth.Broadcast(MaxHealth - OldMaxHealth);
+}
+
+void UGalaxianHealthComponent::OnRep_Health(float OldHealth)
+{
+	OnChangeHealth.Broadcast(Health - OldHealth);
 }
 
 void UGalaxianHealthComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

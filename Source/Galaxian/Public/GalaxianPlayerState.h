@@ -8,6 +8,8 @@
 
 class AGalaxianCharacter;
 
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE(FOnenemyKilledSignature, AGalaxianPlayerState, OnEnemyKilled);
+
 UENUM(BlueprintType)
 enum class EPlayerStateEnum : uint8
 {
@@ -23,9 +25,6 @@ class GALAXIAN_API AGalaxianPlayerState : public APlayerState
 {
 	GENERATED_UCLASS_BODY()
 	
-	UPROPERTY(Replicated)
-	TSubclassOf<AGalaxianCharacter> PlayerPawnClass;
-
 	virtual void CopyProperties(APlayerState* InPlayerState) override;
 
 	UFUNCTION(BlueprintPure, Category = "PlayerState")
@@ -34,8 +33,21 @@ class GALAXIAN_API AGalaxianPlayerState : public APlayerState
 	UFUNCTION(BlueprintCallable, Category = "PlayerState")
 	void SetPlayerState(EPlayerStateEnum NewPlayerState);
 
-	UFUNCTION(Client, Reliable)
-	void GoToMainMenu();
+	UFUNCTION(NetMulticast, Reliable)
+	void GoToMainMenu(bool Win);
+
+	void AddEnemyCounter();
+
+	UFUNCTION(BlueprintPure, Category = "PlayerState")
+	int32 GetEnemyCounter() const;
+
+	virtual void OnRep_Score() override;
+
+	UPROPERTY(Replicated)
+	TSubclassOf<AGalaxianCharacter> PlayerPawnClass;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnenemyKilledSignature OnEnemyKilled;
 
 private:
 	UPROPERTY(Replicated)

@@ -26,7 +26,7 @@ public:
 
 	void StartRaidAttack();
 
-	virtual void OnKilled() override;
+	virtual void OnKilled(AActor* KilledActor, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser) override;
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* RaidAttackImpactEffect;

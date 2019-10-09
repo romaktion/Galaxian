@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GalaxianGameState.h"
 
 // Sets default values
 AGalaxianEnemyController::AGalaxianEnemyController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -60,6 +61,12 @@ void AGalaxianEnemyController::BeginPlay()
 					SpawnedEnemy->OnDestroyed.AddUniqueDynamic(this, &AGalaxianEnemyController::OnDestroyed);
 
 					Enemies.Add(SpawnedEnemy);
+
+					auto GS = Cast<AGalaxianGameState>(World->GetGameState());
+					if (GS)
+					{
+						GS->AddEnemy(SpawnedEnemy);
+					}
 
 					Count++;
 					Side = !Side;
@@ -160,5 +167,15 @@ void AGalaxianEnemyController::OnDestroyed(AActor* Actor)
 	auto Enemy = Cast<AGalaxianCharacter>(Actor);
 	if (Enemy)
 		Enemies.Remove(Enemy);
+
+	auto World = GetWorld();
+	if (World)
+	{
+		auto GS = Cast<AGalaxianGameState>(World->GetGameState());
+		if (GS)
+		{
+			GS->RemoveEnemy(Actor);
+		}
+	}
 }
 

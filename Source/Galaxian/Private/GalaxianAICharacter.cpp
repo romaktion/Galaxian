@@ -9,6 +9,8 @@
 #include "GalaxianDamageType.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GalaxianHealthComponent.h"
+#include "GalaxianPlayerState.h"
+#include "GalaxianProjectile.h"
 
 AGalaxianAICharacter::AGalaxianAICharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 , RaidAttackImpactEffect(nullptr)
@@ -55,9 +57,9 @@ void AGalaxianAICharacter::StartRaidAttack()
 	OnStartRaidAttack.Broadcast();
 }
 
-void AGalaxianAICharacter::OnKilled()
+void AGalaxianAICharacter::OnKilled(AActor* KilledActor, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-	Super::OnKilled();
+	Super::OnKilled(KilledActor, DamageType, InstigatedBy, DamageCauser);
 
 	SetLifeSpan(0.5f);
 }
@@ -71,7 +73,7 @@ void AGalaxianAICharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 		UGameplayStatics::ApplyPointDamage(OtherActor, HealthComp ? HealthComp->GetMaxHealth() : MAX_FLT, FVector::ZeroVector, Hit, GetController(), this, UGalaxianDamageType::StaticClass());
 	}
 
-	if (IsRaidAttack)
+	if (IsRaidAttack && !Cast<AGalaxianProjectile>(OtherActor))
 	{
 		UGameplayStatics::ApplyDamage(this, GetMaxHealth(), GetController(), this, UGalaxianDamageType::StaticClass());
 

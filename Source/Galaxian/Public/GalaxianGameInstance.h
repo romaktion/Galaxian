@@ -18,4 +18,12 @@ class GALAXIAN_API UGalaxianGameInstance : public UGameInstance
 
 	UPROPERTY()
 	TArray<AActor*> IgnoredActors;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TMap<FString, int32> LeaderBoard;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool Win;
+
+	int32 CountDuplicates;
 };
