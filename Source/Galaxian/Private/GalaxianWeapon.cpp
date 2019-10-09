@@ -124,6 +124,15 @@ void AGalaxianWeapon::SpawnProjectile()
 
 	UGameplayStatics::SpawnEmitterAtLocation(World, MuzzleEffect, GetActorTransform(), true, EPSCPoolMethod::AutoRelease);
 
+	if (FireSound.Num() > 0)
+	{
+		auto S = FireSound[FMath::RandRange(0, FireSound.Num() - 1)];
+		if (S)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), S, GetActorLocation());
+		}
+	}
+
 	FTransform Transform;
 	Transform.SetRotation(FQuat(GetActorRotation()));
 	Transform.SetLocation(GetActorLocation());

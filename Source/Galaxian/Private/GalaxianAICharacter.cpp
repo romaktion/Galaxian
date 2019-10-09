@@ -47,6 +47,8 @@ void AGalaxianAICharacter::StartRaidAttack()
 
 	IsRaidAttack= true;
 
+	MulticastOnStartRaidAttack();
+
 	SpawnDefaultController();
 	GetCapsuleComponent()->SetCollisionProfileName("Projectile");
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
@@ -78,6 +80,18 @@ void AGalaxianAICharacter::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 		UGameplayStatics::ApplyDamage(this, GetMaxHealth(), GetController(), this, UGalaxianDamageType::StaticClass());
 
 		MulticastRaidEffect();
+	}
+}
+
+void AGalaxianAICharacter::MulticastOnStartRaidAttack_Implementation()
+{
+	if (OnStartRaidAttackSound.Num() > 0)
+	{
+		auto S = OnStartRaidAttackSound[FMath::RandRange(0, OnStartRaidAttackSound.Num() - 1)];
+		if (S)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), S, GetActorLocation());
+		}
 	}
 }
 

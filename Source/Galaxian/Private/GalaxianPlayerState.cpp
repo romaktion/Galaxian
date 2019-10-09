@@ -6,6 +6,7 @@
 #include "UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "GalaxianGameInstance.h"
+#include "GalaxianPlayerController.h"
 
 AGalaxianPlayerState::AGalaxianPlayerState(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 , PlayerPawnClass(nullptr)
@@ -40,7 +41,7 @@ void AGalaxianPlayerState::AddEnemyCounter()
 	if (Role == ROLE_Authority)
 	{
 		Score += 1;
-		OnEnemyKilled.Broadcast();
+		OnRep_Score();
 	}
  }
 
@@ -52,6 +53,14 @@ int32 AGalaxianPlayerState::GetEnemyCounter() const
 void AGalaxianPlayerState::OnRep_Score()
 {
 	OnEnemyKilled.Broadcast();
+	if (GetPawn())
+	{
+		auto PC = Cast<AGalaxianPlayerController>(GetPawn()->GetController());
+		if (PC)
+		{
+			PC->OnEnemyKilled.Broadcast();
+		}
+	}
 }
 
 void AGalaxianPlayerState::GoToMainMenu_Implementation(bool Win)

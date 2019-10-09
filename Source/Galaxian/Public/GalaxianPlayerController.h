@@ -7,6 +7,7 @@
 #include "GalaxianPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE_OneParam(FOnCharacterKilledSignature, AGalaxianPlayerController, OnCharacterKilled, AActor*, PlayerCharacter);
+DECLARE_DYNAMIC_MULTICAST_SPARSE_DELEGATE(FOnEnemyKilledSignature2, AGalaxianPlayerController, OnEnemyKilled);
 
 /**
  * 
@@ -21,4 +22,7 @@ class GALAXIAN_API AGalaxianPlayerController : public APlayerController
 
 	UPROPERTY(BlueprintAssignable, Category = "Character")
 	FOnCharacterKilledSignature OnCharacterKilled;
+
+	UPROPERTY(BlueprintAssignable, Category = "Character")
+	FOnEnemyKilledSignature2 OnEnemyKilled;
 };

@@ -46,6 +46,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	int32 Diplomacy;
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USoundBase*> ImpactSound;
+
 private:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

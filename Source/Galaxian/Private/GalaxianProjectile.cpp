@@ -14,6 +14,7 @@ AGalaxianProjectile::AGalaxianProjectile(const FObjectInitializer& ObjectInitial
 , Damage(0.f)
 , DamageRadius(0.f)
 , ImpactEffect(nullptr)
+, Diplomacy(0)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -97,9 +98,15 @@ void AGalaxianProjectile::HitImpl(AActor* OtherActor, const FHitResult& Hit, boo
 	if (!IsBlock && UGalaxianBlueprintFunctionLibrary::GetDiplomacyByValue(OtherActor, Diplomacy) == EDiplomacyEnum::DP_Friendly)
 		return;
 
-	if (ImpactEffect)
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorTransform(), true, EPSCPoolMethod::AutoRelease);
+
+	if (ImpactSound.Num() > 0)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorTransform(), true, EPSCPoolMethod::AutoRelease);
+		auto S = ImpactSound[FMath::RandRange(0, ImpactSound.Num() - 1)];
+		if (S)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), S, GetActorLocation());
+		}
 	}
 
 	if (OtherActor)

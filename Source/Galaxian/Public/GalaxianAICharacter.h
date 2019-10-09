@@ -34,12 +34,18 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnOnStartRaidAttackSignature OnStartRaidAttack;
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USoundBase*> OnStartRaidAttackSound;
+
 private:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRaidEffect();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastOnStartRaidAttack();
 
 	bool IsRaidAttack;
 

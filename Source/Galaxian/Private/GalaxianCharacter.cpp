@@ -86,6 +86,13 @@ void AGalaxianCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AGalaxianCharacter::StopFire);
 }
 
+float AGalaxianCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	MulticastDamage();
+
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
 AGalaxianWeapon* AGalaxianCharacter::GetWeapon() const
 {
 	return Weapon;
@@ -152,6 +159,18 @@ void AGalaxianCharacter::MeshTickTimer()
 	GetMesh()->SetComponentTickEnabled(true);
 }
 
+void AGalaxianCharacter::MulticastDamage_Implementation()
+{
+	if (OnDamageSound.Num() > 0)
+	{
+		auto S = OnDamageSound[FMath::RandRange(0, OnDamageSound.Num() - 1)];
+		if (S)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), S, GetActorLocation());
+		}
+	}
+}
+
 void AGalaxianCharacter::MulticastDestroy_Implementation()
 {
 	if (Role == ROLE_Authority)
@@ -166,9 +185,15 @@ void AGalaxianCharacter::MulticastDestroy_Implementation()
 	
 	SetActorHiddenInGame(true);
 
-	if (DestroyEffect)
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyEffect, GetActorTransform(), true, EPSCPoolMethod::AutoRelease);
+
+	if (OnDeathSound.Num() > 0)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestroyEffect, GetActorTransform(), true, EPSCPoolMethod::AutoRelease);
+		auto S = OnDeathSound[FMath::RandRange(0, OnDeathSound.Num() - 1)];
+		if (S)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), S, GetActorLocation());
+		}
 	}
 }
 

@@ -26,6 +26,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	UFUNCTION(BlueprintPure, Category = "Character")
 	AGalaxianWeapon* GetWeapon() const;
 
@@ -67,6 +69,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UParticleSystem* DestroyEffect;
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USoundBase*> OnDamageSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USoundBase*> OnDeathSound;
+
 private:
 	void Move(float Value);
 
@@ -79,6 +87,9 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastDestroy();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastDamage();
 
 	FTimerHandle MeshTickTimerHandler;
 

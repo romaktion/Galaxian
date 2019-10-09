@@ -52,6 +52,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool ManualShot;
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<USoundBase*> FireSound;
+
 private:
 	UFUNCTION()
 	void Fire();
